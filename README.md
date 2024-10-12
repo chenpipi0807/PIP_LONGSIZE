@@ -14,6 +14,8 @@ PIP 长边调整节点是一个用于 ComfyUI 的自定义节点，它可以调�
 2. 将此节点的文件夹复制到 ComfyUI 的  将此节点的文件夹复制到 ComfyUI 的 ``custom_nodes` 目录中。 目录中。
 3. 安装所需的依赖： 安装所需的依赖：
    ```
+   git clone https://github.com/chenpipi0807/PIP_LONGSIZE.git
+   cd PIP_LONGSIZE
    pip install -r requirements.txt
    ```
 
