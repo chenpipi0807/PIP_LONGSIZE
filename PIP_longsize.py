@@ -22,7 +22,8 @@ class PIP_longsize:
             },
         }
 
-    RETURN_TYPES = ("IMAGE",)
+    RETURN_TYPES = ("IMAGE", "INT", "INT")
+    RETURN_NAMES = ("image", "width_int", "height_int")
     FUNCTION = "resize_image"
     CATEGORY = "图像处理"
 
@@ -107,7 +108,7 @@ class PIP_longsize:
         print(f"输出图像的数据类型: {resized_image_batch.dtype}")
         print(f"输出图像的值范围: [{resized_image_batch.min()}, {resized_image_batch.max()}]")
 
-        return (resized_image_batch,)
+        return (resized_image_batch, new_width, new_height)
 
 # 包含所有要导出的节点的字典，以及它们的名称
 NODE_CLASS_MAPPINGS = {
