@@ -110,12 +110,120 @@ class PIP_longsize:
 
         return (resized_image_batch, new_width, new_height)
 
+class PIP_ProportionalCrop:
+    def __init__(self):
+        pass
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "image": ("IMAGE",),
+                "aspect_ratio": (["1:1", "4:3", "3:4", "16:9", "9:16", "2:1", "1:2", "3:2", "2:3", "5:4", "4:5", "21:9", "9:21", "1:1.41 (A系列)", "1.41:1 (A系列)", "1:1.618 (黄金比例)", "1.618:1 (黄金比例)"],),
+                "maintain_direction": (["中心", "上", "下", "左", "右"],),
+            },
+        }
+
+    RETURN_TYPES = ("IMAGE", "INT", "INT")
+    RETURN_NAMES = ("image", "width_int", "height_int")
+    FUNCTION = "crop_image"
+    CATEGORY = "图像处理"
+
+    def crop_image(self, image, aspect_ratio, maintain_direction):
+        # 确保图像是正确的维度 (batch_size, height, width, channels)
+        if image.dim() == 3:
+            image = image.unsqueeze(0)  # 添加批次维度
+
+        batch_size, height, width, channels = image.shape
+        print(f"输入图像尺寸: {image.shape}")  # 调试信息
+
+        # 1. 获取图像的宽和高
+        print(f"原始图像尺寸: 宽={width}, 高={height}")
+
+        # 2. 解析目标宽高比例
+        aspect_map = {
+            "1:1": 1.0,
+            "4:3": 4/3,
+            "3:4": 3/4,
+            "16:9": 16/9,
+            "9:16": 9/16,
+            "2:1": 2.0,
+            "1:2": 0.5,
+            "3:2": 3/2,
+            "2:3": 2/3,
+            "5:4": 5/4,
+            "4:5": 4/5,
+            "21:9": 21/9,
+            "9:21": 9/21,
+            "1:1.41 (A系列)": 1/1.41,
+            "1.41:1 (A系列)": 1.41,
+            "1:1.618 (黄金比例)": 1/1.618,
+            "1.618:1 (黄金比例)": 1.618
+        }
+        target_ratio = aspect_map[aspect_ratio]
+        print(f"目标宽高比: {target_ratio:.4f}")
+
+        # 3. 计算裁切区域的尺寸
+        current_ratio = width / height
+        
+        if target_ratio > current_ratio:
+            # 目标比例比当前比例宽，需要减少高度
+            new_height = int(width / target_ratio)
+            new_width = width
+        else:
+            # 目标比例比当前比例窄，需要减少宽度
+            new_width = int(height * target_ratio)
+            new_height = height
+            
+        print(f"裁切后的尺寸: {new_width}x{new_height}")
+        
+        # 4. 计算裁切的起始位置
+        x_start = 0
+        y_start = 0
+        
+        if new_width < width:
+            # 需要在水平方向裁切
+            if maintain_direction == "左":
+                x_start = 0
+            elif maintain_direction == "右":
+                x_start = width - new_width
+            else:  # 中心、上、下
+                x_start = (width - new_width) // 2
+                
+        if new_height < height:
+            # 需要在垂直方向裁切
+            if maintain_direction == "上":
+                y_start = 0
+            elif maintain_direction == "下":
+                y_start = height - new_height
+            else:  # 中心、左、右
+                y_start = (height - new_height) // 2
+                
+        print(f"裁切起始位置: x={x_start}, y={y_start}")
+
+        # 5. 裁切图像
+        cropped_images = []
+        for i in range(batch_size):
+            img = image[i]
+            # 裁切图像
+            cropped = img[y_start:y_start+new_height, x_start:x_start+new_width, :]
+            cropped_images.append(cropped)
+
+        # 6. 将裁切后的图像组合成批次
+        cropped_batch = torch.stack(cropped_images, dim=0)
+        
+        print(f"最终输出图像尺寸: {cropped_batch.shape}")
+        
+        return (cropped_batch, new_width, new_height)
+
 # 包含所有要导出的节点的字典，以及它们的名称
 NODE_CLASS_MAPPINGS = {
-    "PIP_longsize": PIP_longsize
+    "PIP_longsize": PIP_longsize,
+    "PIP_ProportionalCrop": PIP_ProportionalCrop
 }
 
 # 包含节点的友好/人类可读标题的字典
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "PIP_longsize": "PIP 长边调整"
+    "PIP_longsize": "PIP 长边调整",
+    "PIP_ProportionalCrop": "PIP 等比例裁切"
 }
