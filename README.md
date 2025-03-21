@@ -1,4 +1,5 @@
 ## PIP 长边调整节点 PIP 长边调整节点
+![微信截图_20250321154122](https://github.com/user-attachments/assets/45455018-9a83-4a82-b30e-3ce9ddfd8612)
 
 #### 简介 简介
 PIP 长边调整节点是一个用于 ComfyUI 的自定义节点，
