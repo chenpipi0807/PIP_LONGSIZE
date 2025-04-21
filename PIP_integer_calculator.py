@@ -32,6 +32,19 @@ class PIP_IntegerCalculator:
     CATEGORY = "数学运算"
 
     def calculate(self, input_number, coefficient, operation, output_type):
+        # 确保输入值不为None
+        if input_number is None:
+            print("警告: 输入数字为None，将使用默认值0")
+            input_number = 0
+            
+        if coefficient is None:
+            print("警告: 系数为None，将使用默认值1.0")
+            coefficient = 1.0
+        
+        # 确保输入值是正确的数值类型
+        input_number = int(input_number)
+        coefficient = float(coefficient)
+            
         # 执行基本数学运算
         if operation == "加法":
             result = input_number + coefficient
@@ -40,16 +53,14 @@ class PIP_IntegerCalculator:
         elif operation == "乘法":
             result = input_number * coefficient
         elif operation == "除法":
-            if coefficient == 0:
-                print("警告: 除数不能为零，将使用默认值1.0")
+            if coefficient == 0 or coefficient is None:
+                print("警告: 除数不能为零或None，将使用默认值1.0")
                 coefficient = 1.0
             result = input_number / coefficient
         
+        # 计算整数和浮点数结果
+        integer_result = int(round(result))  # 确保整数结果是int类型
+        float_result = float(result)         # 确保浮点结果是float类型
+        
         # 根据输出类型返回结果
-        if output_type == "整数":
-            # 四舍五入取整
-            integer_result = round(result)
-            return (integer_result, float(result))
-        else:
-            # 保持浮点数
-            return (int(result), result)
+        return (integer_result, float_result)
