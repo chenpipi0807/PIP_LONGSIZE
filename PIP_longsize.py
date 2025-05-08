@@ -33,22 +33,16 @@ class PIP_longsize:
             image = image.unsqueeze(0)  # 添加批次维度
 
         batch_size, height, width, channels = image.shape
-        print(f"输入图像尺寸: {image.shape}")  # 调试信息
-
         # 1. 获取图像的宽和高
-        print(f"原始图像尺寸: 宽={width}, 高={height}")
 
         # 2. 比较原始宽高数值，取最长边数值
         longest_side = max(width, height)
-        print(f"最长边: {longest_side}")
 
         # 3. 计算原始图像宽高比例
         aspect_ratio = width / height
-        print(f"原始宽高比: {aspect_ratio:.4f}")
 
         # 4. 根据用户输入的新的最长边的数值
         new_longest_side = max_dimension
-        print(f"新的最长边: {new_longest_side}")
 
         # 5. 根据新的最长边计算新的宽和高
         if width >= height:
@@ -61,7 +55,6 @@ class PIP_longsize:
         # 6. 确保新的宽和高都是整数
         new_width = int(new_width)
         new_height = int(new_height)
-        print(f"调整后的图像尺寸: {new_width}x{new_height}")
 
         # 设置压缩级别
         compression_level = {"无损输出": 0, "中档压缩": 4, "最小文件": 9}[compression]
@@ -71,8 +64,7 @@ class PIP_longsize:
         for i in range(batch_size):
             img = image[i]
             
-            # 打印输入图像的一些像素值
-            print(f"输入图像的一些像素值: {img[0:5, 0:5, :]}")
+            # 处理输入图像
             
             # 确保图像数据在0-1范围内
             img = img.float() / 255.0 if img.dtype == torch.uint8 else img.float()
@@ -97,16 +89,13 @@ class PIP_longsize:
             resized_np = np.array(png_image).astype(np.float32) / 255.0
             resized_tensor = torch.from_numpy(resized_np)
             
-            # 打印输出图像的一些像素值
-            print(f"输出图像的一些像素值: {resized_tensor[0:5, 0:5, :]}")
+            # 处理完成
             
             resized_images.append(resized_tensor)
 
         resized_image_batch = torch.stack(resized_images, dim=0)
 
-        print(f"最终输出图像尺寸: {resized_image_batch.shape}")  # 调试信息
-        print(f"输出图像的数据类型: {resized_image_batch.dtype}")
-        print(f"输出图像的值范围: [{resized_image_batch.min()}, {resized_image_batch.max()}]")
+        # 返回处理后的图像和尺寸
 
         return (resized_image_batch, new_width, new_height)
 
@@ -161,7 +150,6 @@ class PIP_ProportionalCrop:
             "1.618:1 (黄金比例)": 1.618
         }
         target_ratio = aspect_map[aspect_ratio]
-        print(f"目标宽高比: {target_ratio:.4f}")
 
         # 3. 计算裁切区域的尺寸
         current_ratio = width / height
@@ -175,7 +163,7 @@ class PIP_ProportionalCrop:
             new_width = int(height * target_ratio)
             new_height = height
             
-        print(f"裁切后的尺寸: {new_width}x{new_height}")
+        # 计算裁切后的尺寸
         
         # 4. 计算裁切的起始位置
         x_start = 0
@@ -199,7 +187,7 @@ class PIP_ProportionalCrop:
             else:  # 中心、左、右
                 y_start = (height - new_height) // 2
                 
-        print(f"裁切起始位置: x={x_start}, y={y_start}")
+        # 确定裁切起始位置
 
         # 5. 裁切图像
         cropped_images = []
@@ -212,7 +200,7 @@ class PIP_ProportionalCrop:
         # 6. 将裁切后的图像组合成批次
         cropped_batch = torch.stack(cropped_images, dim=0)
         
-        print(f"最终输出图像尺寸: {cropped_batch.shape}")
+        # 准备返回裁切后的图像
         
         return (cropped_batch, new_width, new_height)
 
